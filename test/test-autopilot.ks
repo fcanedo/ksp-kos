@@ -24,6 +24,8 @@ until brakes or stop {
 
     if char = "b" set stop to true.
   }.
+
+  wait 0.001.
 }.
 
 set ship:control:neutralize to true.
