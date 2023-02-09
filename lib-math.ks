@@ -11,10 +11,10 @@ local function axisTorque {
 
   // The dotproduct of angular momentum and the axis
   // gives the rate of rotation along the axis
-  return vdot(axis, ship:angularvel).
+  return vdot(axis, ship:angularmomentum).
 }.
 
-// Returns the torque (rate of rotation) along one of the major axis,
+// Returns the torque along one of the major axis,
 // as specified.
 local function torqueOf {
   local parameter steering. // "pitch", "yaw" or "roll"
