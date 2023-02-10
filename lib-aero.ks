@@ -3,112 +3,155 @@
 export(lex(
   "setAltitude", setAltitude@,
   "maintainAltitude", maintainAltitude@,
-  "displayStats", displayStats@,
-  "step", step@
+  "setLevel", setLevel@,
+  "maintainLevel", maintainLevel@,
+  "getStats", getStats@,
+  "printStats", printStats@
 )).
 
-// Sets the desired vertical velocity to get to and maintain the
-// desired altitude. No min or max output, relying on max/min pitch angle.
-local verticalVelocityPid is pidloop(1.0, 0.0, 0.0, -50, 50).
-set verticalVelocityPid:setpoint to 2000.
+local output is import("output").
 
-// Sets the desired pitch to get to and maintain the desired
-// vertical velocity as determined by verticalVelocityPid.
-// Max pitch angle is 30 degrees either way, to avoid climbing or
-// descending too steeply.
-local pitchPid is pidloop(1.0, 0.0, 0.0, -30, 30).
+// contains the PIDs required for maintaining altitude
+local altitudePIDs is lexicon(
+  // Sets the desired vertical velocity to get to and maintain the
+  // desired altitude.
+  "verticalVelocity", lexicon(
+    "pid", pidloop(1.0, 0.0, 0.0, -50, 50),
+    "par", "altitude"
+  ),
 
-// Sets the desired torque rate to get to and maintain the desired
-// pitch angle as determined by pitchPid.
-local torquePid is pidloop(1.0, 0.0, 0.0, -100, 100).
+  // Sets the desired pitch to get to and maintain the desired
+  // vertical velocity as determined by verticalVelocity:pid.
+  // Max pitch angle is 45 degrees either way, to avoid climbing or
+  // descending too steeply.
+  "pitch", lexicon(
+    "pid", pidloop(1.0, 0.0, 0.0, -45, 45),
+    "par", "v. velocity"
+  ),
 
-// Sets the desired elevator input to get to and maintain the desired
-// rotation rate as determined by torquePid.
-local elevatorPid is pidloop(0.01, 0.0, 0.0, -1, 1).
+  // Sets the desired torque rate to get to and maintain the desired
+  // pitch angle as determined by pitch:pid.
+  "torque", lexicon(
+    "pid", pidloop(1.0, 0.0, 0.0, -100, 100),
+    "par", "pitch"
+  ),
 
-// Remove after testing
-local elevatorInput is 0.
+  // Sets the desired elevator input to get to and maintain the desired
+  // rotation rate as determined by torque:pid.
+  "elevator", lexicon(
+    "pid", pidloop(0.01, 0.0, 0.0, -1, 1),
+    "par", "torque"
+  )
+).
+
+// default altitude if not set with setAltitude
+set altitudePIDs:verticalVelocity:setpoint to 2000.
+
+local rollPIDs is lexicon(
+  "torque", lexicon(
+    "pid", pidloop(1.0, 0.0, 0.0, -10, 10),
+    "par", "roll"
+  ),
+  "roll", lexicon(
+    "pid", pidloop(0.01, 0.0, 0.0, -1, 1),
+    "par", "torque"
+  )
+).
+
+// we like to fly level
+set rollPIDs:torque:setpoint to 0.
 
 local function setAltitude {
   local parameter newAltitude.
 
-  set verticalVelocityPid:setpoint to newAltitude.
-}.
-
-local function step {
-  local parameter mode.
-  local parameter direction.
-  local pid is "".
-
-  if mode = "v" set pid to verticalVelocityPid.
-  if mode = "p" set pid to pitchPid.
-  if mode = "t" set pid to torquePid.
-  if mode = "e" set pid to elevatorPid.
-
-  if direction = "u" set pid:kp to pid:kp + 0.1.
-  if direction = "d" set pid:kp to pid:kp - 0.1.
+  set altitudePIDs:verticalVelocity:pid:setpoint to newAltitude.
 }.
 
 // Returns the elevator input needed to get to and maintain
 // the desired altitude. Needs to be called continuously.
 // Call setAltitude to set the desired altitude.
 local function maintainAltitude {
-  local verticalVelocity is
-    verticalVelocityPid:update(time:seconds, ship:altitude).
+  local targetVVelocity is
+    altitudePIDs:verticalVelocity:pid:update(time:seconds, ship:altitude).
 
-  set pitchPid:setpoint to verticalVelocity.
-  local pitch is pitchPid:update(time:seconds, ship:verticalspeed).
+  set altitudePIDs:pitch:pid:setpoint to targetVVelocity.
+  local targetPitch is altitudePIDs:pitch:pid:update(time:seconds, ship:verticalspeed).
 
-  set torquePid:setpoint to pitch.
-  local torque is torquePid:update(time:seconds, torqueOf("pitch")).
+  set altitudePIDs:torque:pid:setpoint to targetPitch.
+  local targetTorque is altitudePIDs:torque:pid:update(time:seconds, getPitch()).
 
-  set elevatorPid:setpoint to torque.
-  set elevatorInput to elevatorPid:update(time:seconds, getPitch()).
-  return elevatorInput.
+  set altitudePIDs:elevator:pid:setpoint to targetTorque.
+  return altitudePIDs:elevator:pid:update(time:seconds, torqueOf("pitch")).
 }.
 
-// local function maintainAltitude {
-//   local parameter altitude is verticalVelocityPid:setpoint.
-// 
-//   set verticalVelocityPid:setpoint to altitude.
-// 
-//   lock pitchPid:setpoint to
-//     verticalVelocityPid:update(time:seconds, ship:altitude).
-// 
-//   lock elevatorPid:setpoint to
-//     pitchPid:update(time:seconds, ship:verticalspeed).
-// 
-//   lock ship:control:pitch to elevatorPid:update(time:seconds, getPitch).
-// }.
+local function setLevel {
+  local parameter newLevel.
+
+  set rollPIDs:torque:pid:setpoint to newLevel.
+}.
+
+local function maintainLevel {
+  local targetRoll is rollPIDs:torque:pid:update(time:seconds, getRoll).
+
+  set rollPIDs:roll:pid:setpoint to targetRoll.
+  return rollPIDs:roll:pid:update(time:seconds, torqueOf("roll")).
+}.
+
+local function getStats {
+  local parameter controlSet is "altitude".
+
+  local pidSet is lexicon().
+
+  if controlSet = "altitude" {
+    set pidSet to altitudePIDs.
+  } else {
+    set pidSet to rollPIDs.
+  }.
+
+  local result is list().
+
+  for key in pidSet:keys {
+    result:add(lexicon(
+      "par", pidSet[key]:par, // name of the parameter under control
+      "input", pidSet[key]:pid:input, // the last measured value
+      "setpoint", pidSet[key]:pid:setpoint, // the desired value
+      "output", pidSet[key]:pid:output // the control input
+    )).
+  }.
+
+  return result.
+}.
+
+local function printStats {
+  local parameter controlSet is "altitude".
+  local parameter start is -1.
+
+  local i is 0.
+
+  for stat in getStats(controlSet) {
+    local prcsn is choose 2 if stat:setpoint < 1000 else 0.
+    local line is output:format(stat:par, 12) +
+      "| target: " + output:format(stat:setpoint, 6, prcsn) +
+      ", actual: " + output:format(stat:input, 6, prcsn).
+
+    if start > -1
+      print output:format(line, terminal:width) at(0, start + i).
+    else
+      print line.
+
+    set i to i + 1.
+  }.
+}.
 
 local function getPitch {
   return 90 - vectorangle(ship:up:forevector, ship:facing:forevector).
 }.
 
-local function displayStats {
-  clearscreen.
-  print "Desired altitude: " + verticalVelocityPid:setpoint.
-  print "Actual altitude: " + ship:altitude.
-  print "Desired vertical speed: " + pitchPid:setpoint.
-  print "Actual vertical speed: " + ship:verticalspeed.
-  print "Desired pitch: " + torquePid:setpoint.
-  print "Actual pitch: " + getPitch().
-  print "Desired torque: " + elevatorPid:setpoint.
-  print "Actual torque: " + torqueOf("pitch").
-  print "Desired elevator input: " + elevatorInput.
-  print "Elevator input: " + ship:control:pitch.
-  print "Vertical speed Kp: " + verticalVelocityPid:Kp.
-  print "Vertical speed Ki: " + verticalVelocityPid:Ki.
-  print "Vertical speed Kd: " + verticalVelocityPid:Kd.
-  print "Pitch Kp: " + pitchPid:Kp.
-  print "Pitch Ki: " + pitchPid:Ki.
-  print "Pitch Kd: " + pitchPid:Kd.
-  print "Rotation Kp: " + pitchPid:Kp.
-  print "Rotation Ki: " + pitchPid:Ki.
-  print "Rotation Kd: " + pitchPid:Kd.
-  print "Elevator Kp: " + elevatorPid:Kp.
-  print "Elevator Ki: " + elevatorPid:Ki.
-  print "Elevator Kd: " + elevatorPid:Kd.
+local function getRoll {
+  local trig_x is vdot(ship:facing:topvector, ship:up:vector).
+  local vec_y is vcrs(ship:up:vector, ship:facing:forevector).
+  local trig_y is vdot(ship:facing:topvector, vec_y).
+  return arctan2(trig_y, trig_x).
 }.
 
 local function axisTorque {
