@@ -10,8 +10,7 @@
     local parameter libDir is "".
     local parameter compilation is true.
   
-  
-    if libs:haskey(libName) return libs:libName.
+    if libs:haskey(libName) return libs[libName].
     else {
       local fileName is "lib-" + libName + ".ks".
       local localPath is
