@@ -9,6 +9,7 @@ export(lex(
   "printStats", printStats@
 )).
 
+local math is import("math").
 local output is import("output").
 
 // contains the PIDs required for maintaining altitude
@@ -61,6 +62,9 @@ local rollPIDs is lexicon(
 // we like to fly level
 set rollPIDs:torque:setpoint to 0.
 
+local headingPIDs is lexicon(
+
+).
 local function setAltitude {
   local parameter newAltitude.
 
@@ -78,10 +82,10 @@ local function maintainAltitude {
   local targetPitch is altitudePIDs:pitch:pid:update(time:seconds, ship:verticalspeed).
 
   set altitudePIDs:torque:pid:setpoint to targetPitch.
-  local targetTorque is altitudePIDs:torque:pid:update(time:seconds, getPitch()).
+  local targetTorque is altitudePIDs:torque:pid:update(time:seconds, math:getPitch()).
 
   set altitudePIDs:elevator:pid:setpoint to targetTorque.
-  return altitudePIDs:elevator:pid:update(time:seconds, torqueOf("pitch")).
+  return altitudePIDs:elevator:pid:update(time:seconds, math:torqueOf("pitch")).
 }.
 
 local function setLevel {
@@ -91,10 +95,10 @@ local function setLevel {
 }.
 
 local function maintainLevel {
-  local targetRoll is rollPIDs:torque:pid:update(time:seconds, getRoll).
+  local targetRoll is rollPIDs:torque:pid:update(time:seconds, math:getRoll()).
 
   set rollPIDs:roll:pid:setpoint to targetRoll.
-  return rollPIDs:roll:pid:update(time:seconds, torqueOf("roll")).
+  return rollPIDs:roll:pid:update(time:seconds, math:torqueOf("roll")).
 }.
 
 local function getStats {
@@ -152,20 +156,4 @@ local function getRoll {
   local vec_y is vcrs(ship:up:vector, ship:facing:forevector).
   local trig_y is vdot(ship:facing:topvector, vec_y).
   return arctan2(trig_y, trig_x).
-}.
-
-local function axisTorque {
-  local parameter axis. // Vector of the axis of interest.
-
-  // The dotproduct of angular momentum and the axis
-  // gives the rate of rotation along the axis
-  return vdot(axis, ship:angularvel).
-}.
-
-local function torqueOf {
-  local parameter steering. // "pitch", "yaw" or "roll"
-
-  if steering = "pitch" return axisTorque(ship:facing * v(1, 0, 0)).
-  if steering = "yaw" return axisTorque(ship:facing * v(0, 1, 0)).
-  if steering = "roll" return axisTorque(ship:facing * v(0, 0, 1)).
 }.

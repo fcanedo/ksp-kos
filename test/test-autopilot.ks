@@ -4,6 +4,7 @@ runoncepath("0:/libs.ks").
 
 local aero is import("aero", "", false).
 local output is import("output", "", false).
+local math is import("math", "", false).
 
 aero:setAltitude(2000).
 
@@ -27,6 +28,8 @@ until brakes or stop {
 
   aero:printStats("altitude", 0).
   aero:printStats("roll", 5).
+
+  print output:fulll(output:format(math:compassHeading(), 7, 2)) at (0, 11).
 
   if terminal:input:haschar {
     local char is terminal:input:getchar:tolower.
@@ -94,4 +97,6 @@ local function showPrompt {
   local parameter text is prompt + input.
 
   print output:format(text, terminal:width) at (0, PROMPT_LINE).
+  print output:format(" ", terminal:width) at (0, PROMPT_LINE + 1).
+  // ^ clear the line below too
 }.

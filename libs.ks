@@ -6,8 +6,18 @@
   local libs is lex().
 
   local globalDebug is false.
+
+  local init is false.
+
+  global setInit is {
+    set init to true.
+  }.
   
-  global import is {
+  global function setDebug {
+    set globalDebug to true.
+  }.
+
+  global function import {
     local parameter libName.
     local parameter libDir is "".
     local parameter debug is false.
@@ -48,9 +58,17 @@
     }
   }.
   
-  global export is {
+  global function export {
     local parameter funcs.
   
     set libs[st:peek()] to funcs.
+  }.
+
+  global function execute {
+    local parameter main.
+
+    if not init {
+      main().
+    }.
   }.
 }

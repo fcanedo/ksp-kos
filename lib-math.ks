@@ -3,7 +3,10 @@
 export(lex(
   "axisTorque", axisTorque@,
   "torqueOf", torqueOf@,
-  "calcBurnTime", calcBurnTime@
+  "calcBurnTime", calcBurnTime@,
+  "compassHeading", compassHeading@,
+  "getPitch", getPitch@,
+  "getRoll", getRoll@
 )).
 
 local stts is import("stats").
@@ -53,4 +56,28 @@ local function calcBurnTime {
       ship:availablethrust,
     "endMass", startingMass * propFrac
   ).
+}.
+
+local function compassHeading {
+  local east is vcrs(ship:up:vector, ship:north:vector).
+  local trig_x is vdot(ship:north:vector, ship:facing:forevector).
+  local trig_y is vdot(east, ship:facing:forevector).
+
+  local result is arctan2(trig_y, trig_x).
+
+  if result < 0
+    return 360 + result.
+  else
+    return result.
+}.
+
+local function getPitch {
+  return 90 - vectorangle(ship:up:forevector, ship:facing:forevector).
+}.
+
+local function getRoll {
+  local trig_x is vdot(ship:facing:topvector, ship:up:vector).
+  local vec_y is vcrs(ship:up:vector, ship:facing:forevector).
+  local trig_y is vdot(ship:facing:topvector, vec_y).
+  return arctan2(trig_y, trig_x).
 }.
