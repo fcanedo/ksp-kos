@@ -1,10 +1,11 @@
 @lazyglobal off.
 
 export(lex(
-  "format", format@
+  "format", format@,
+  "fulll", fulll@
 )).
 
-global function format {
+local function format {
   local parameter data.
   local parameter width is 0.
   local parameter precision is 0.
@@ -18,4 +19,10 @@ global function format {
   } else {
     return data:tostring:padleft(width).
   }.
+}.
+
+local function fulll {
+  local parameter data is " ".
+
+  return format(data, terminal:width).
 }.
