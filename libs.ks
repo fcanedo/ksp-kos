@@ -28,15 +28,10 @@
       st:push(libName).
   
       if globalDebug {
-        print "localPath: [" + localPath + "]".
-        print "exists: [" + exists(localPath) + "]".
         if exists(localPath) deletepath(localPath).
         local ksmPath is localPath:changeextension("ksm").
-        print "ksmPath: [" + ksmPath + "]".
-        print "exists: [" + exists(ksmPath) + "]".
         if exists(ksmPath) deletepath(ksmPath).
       } else{
-        print "nope".
         set localPath to localPath:changeextension("ksm").
       }.
 
