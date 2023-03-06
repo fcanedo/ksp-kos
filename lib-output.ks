@@ -33,7 +33,7 @@ local function addTrailingZeros {
 
   local result is data.
   local pointLoc is data:findlast(".").
-  local zeros is max(data:length - pointLoc, 0).
+  local zeros is choose data:length - pointLoc if pointLoc > -1 else 0.
 
   from {
     local i is zeros.
