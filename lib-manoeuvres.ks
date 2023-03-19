@@ -30,6 +30,7 @@ local function execute {
   lock burnStart to burnStartTime:seconds - time:seconds.
 
   clearscreen.
+  tpt:pushCursorDown(8).
 
   until burnStart <= 0 {
     printStats().

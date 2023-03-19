@@ -2,7 +2,8 @@
 
 export(lex(
   "format", format@,
-  "fulll", fulll@
+  "fulll", fulll@,
+  "pushCursorDown", pushCursorDown@
 )).
 
 local function format {
@@ -44,4 +45,12 @@ local function addTrailingZeros {
   }.
 
   return result.
+}.
+
+local function pushCursorDown {
+  local parameter lines.
+
+  from { local i is lines. } until i <= 0 step {set i to i - 1. } do {
+    print " ".
+  }.
 }.
