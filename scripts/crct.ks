@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-local parameter apsis.
+local parameter apsis is "".
 
 runoncepath("libs").
 
