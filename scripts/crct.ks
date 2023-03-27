@@ -2,7 +2,7 @@
 
 local parameter apsis is "".
 
-runoncepath("libs").
+runoncepath("libs/libs").
 
 lib:execute(main@).
 

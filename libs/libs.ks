@@ -49,10 +49,10 @@ local function import {
   data:libNames:push(libName).
 
   local fullName is "lib-" + libName.
-  local localPath is path("1:/"):combine(fullName).
+  local localPath is path("1:/"):combine("libs", fullName).
 
   if data:init fetchFile(
-    open(path("0:/"):combine(fullName)),
+    open(path("0:/"):combine("libs", fullName)),
     localPath
   ).
 
@@ -65,6 +65,10 @@ local function fetchFile {
   local parameter remoteFile.
   local parameter localPath.
 
+  local function copyFile {
+    copypath(remoteFile, localPath:changeextension("ks")).
+  }.
+
   if not exists(localPath) {
     if not data:debug {
       compile remoteFile to localPath:changeextension("ksm").
@@ -72,10 +76,10 @@ local function fetchFile {
 
       if remoteFile:size <=localFile:size {
         deletepath(localFile).
-        copypath(remoteFile, localPath:changeextension("ks")).
+        copyFile().
       }.
     } else
-      copypath(remoteFile, localPath:changeextension("ks")).
+      copyFile().
   }.
 }.
 
