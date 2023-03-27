@@ -1,12 +1,12 @@
 @lazyglobal off.
 
-export(lex(
+lib:export(lex(
   "execute", execute@
 )).
 
-local stts is import("stats").
-local math is import("math").
-local tpt is import("output").
+local stts is lib:import("stats").
+local math is lib:import("math").
+local tpt is lib:import("output").
 
 // Executes the next manoeuver node
 local function execute {

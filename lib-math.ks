@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-export(lex(
+lib:export(lex(
   "axisTorque", axisTorque@,
   "torqueOf", torqueOf@,
   "calcBurnTime", calcBurnTime@,
@@ -9,7 +9,7 @@ export(lex(
   "getRoll", getRoll@
 )).
 
-local stts is import("stats").
+local stts is lib:import("stats").
 
 // Returns the torque (rate of rotation) along the desired axis.
 local function axisTorque {

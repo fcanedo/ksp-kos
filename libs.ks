@@ -1,74 +1,86 @@
 @lazyglobal off.
 
-{
-  local st is stack().
-  
-  local libs is lex().
+global lib is lexicon(
+  "init", init@,
+  "import", import@,
+  "export", export@,
+  "execute", execute@
+).
 
-  local globalDebug is false.
+local data is lexicon(
+ "libs", lexicon(),
+ "libNames", stack(),
+ "init", false,
+ "debug", false
+).
 
-  local init is false.
+local function execute {
+  local parameter main.
 
-  global setInit is {
-    set init to true.
-  }.
-  
-  global function setDebug {
-    set globalDebug to true.
-  }.
+  if not data:init
+    main().
+}.
 
-  global function import {
-    local parameter libName.
-    local parameter libDir is "".
-    local parameter debug is false.
+local function init {
+  local parameter debug is false.
 
-    if libs:haskey(libName) return libs[libName].
-    else {
-      // once one library is not to be compiled, we won't compile any more
-      set globalDebug to globalDebug or debug.
+  set data:debug to debug.
+  set data:init to true.
 
-      local fileName is "lib-" + libName + ".ks".
-      local localPath is
-        path("1:/"):combine(fileName).
+  for script in archive:files:scripts:list:values {
+    if script:isfile {
+      local localPath is path(path(script):changeextension(""):name).
 
-      // empty strings are ignored by `combine`, so this does
-      // the right thing
-      local remotePath is path("0:/"):combine(libDir, fileName).
+      fetchFile(script, localPath).
 
-      st:push(libName).
-  
-      if globalDebug {
-        if exists(localPath) deletepath(localPath).
-        local ksmPath is localPath:changeextension("ksm").
-        if exists(ksmPath) deletepath(ksmPath).
-      } else{
-        set localPath to localPath:changeextension("ksm").
-      }.
-
-      if not exists(localPath) or globalDebug {
-        if not globalDebug {
-          compile remotePath to localPath.
-        } else {
-          copypath(remotePath, localPath).
-        }.
-      }.
       runoncepath(localPath).
-  
-      return libs[st:pop()].
-    }
-  }.
-  
-  global function export {
-    local parameter funcs.
-  
-    set libs[st:peek()] to funcs.
-  }.
-
-  global function execute {
-    local parameter main.
-
-    if not init {
-      main().
     }.
   }.
-}
+  
+  set data:init to false.
+}.
+
+local function import {
+  local parameter libName.
+
+  if data:libs:haskey(libName)
+    return data:libs[libName].
+
+  data:libNames:push(libName).
+
+  local fullName is "lib-" + libName.
+  local localPath is path("1:/"):combine(fullName).
+
+  if data:init fetchFile(
+    open(path("0:/"):combine(fullName)),
+    localPath
+  ).
+
+  runoncepath(localPath).
+
+  return data:libs[data:libNames:pop()].
+}.
+
+local function fetchFile {
+  local parameter remoteFile.
+  local parameter localPath.
+
+  if not exists(localPath) {
+    if not data:debug {
+      compile remoteFile to localPath:changeextension("ksm").
+      local localFile is open(localPath).
+
+      if remoteFile:size <=localFile:size {
+        deletepath(localFile).
+        copypath(remoteFile, localPath:changeextension("ks")).
+      }.
+    } else
+      copypath(remoteFile, localPath:changeextension("ks")).
+  }.
+}.
+
+local function export {
+  local parameter funcs.
+
+  data:libs:add(data:libNames:peek(), funcs).
+}.

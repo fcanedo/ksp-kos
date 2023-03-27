@@ -12,18 +12,7 @@ if scriptpath() = bootFilePath and
   copypath("0:/libs.ks", "1:/libs.ks").
   runoncepath("libs").
 
-  setDebug().
-  setInit().
-
-  local scripts is archive:files:scripts:list:values.
-
-  for script in scripts {
-    local remotePath is path("0:/scripts"):combine(script:name).
-    local localPath is path("1:/"):combine(script:name).
-
-    copypath(remotePath, localPath).
-    runpath(localPath).
-  }.
+  lib:init(true).
 
   print "System initialized.".
 } else {

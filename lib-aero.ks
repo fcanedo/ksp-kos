@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-export(lex(
+lib:export(lex(
   "setAltitude", setAltitude@,
   "maintainAltitude", maintainAltitude@,
   "setLevel", setLevel@,
@@ -9,8 +9,8 @@ export(lex(
   "printStats", printStats@
 )).
 
-local math is import("math").
-local output is import("output").
+local math is lib:import("math").
+local output is lib:import("output").
 
 // contains the PIDs required for maintaining altitude
 local altitudePIDs is lexicon(

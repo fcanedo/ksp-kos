@@ -4,7 +4,7 @@ local parameter apsis is "".
 
 runoncepath("libs").
 
-execute(main@).
+lib:execute(main@).
 
 local function main {
   if apsis:startswith("a")

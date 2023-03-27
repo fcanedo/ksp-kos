@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-export(lex(
+lib:export(lex(
   "getIsp", getIsp@
 )).
 
