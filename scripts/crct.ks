@@ -7,9 +7,9 @@ runoncepath("libs/libs").
 lib:execute(main@).
 
 local function main {
-  if apsis:startswith("a")
+  if "apoapsis":startswith(apsis)
     addNode(body:radius + orbit:apoapsis, time + eta:apoapsis).
-  else if apsis:startswith("p")
+  else if "periapsis":startswith(apsis)
     addNode(body:radius + orbit:periapsis, time + eta:periapsis).
   else {
     print "Parameter a[poapsis] or p[eriapsis] required.".
