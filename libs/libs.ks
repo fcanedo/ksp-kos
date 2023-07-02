@@ -29,15 +29,21 @@ local function init {
 
   for script in archive:files:scripts:list:values {
     if script:isfile {
-      local localPath is path(path(script):changeextension(""):name).
-
-      fetchFile(script, localPath).
-
-      runoncepath(localPath).
+      initScript(script).
     }.
   }.
   
   set data:init to false.
+}.
+
+local function initScript {
+  local parameter script.
+
+  local localPath is path(path(script):changeextension(""):name).
+
+  fetchFile(script, localPath).
+
+  runoncepath(localPath).
 }.
 
 local function import {
@@ -49,14 +55,21 @@ local function import {
   data:libNames:push(libName).
 
   local fullName is "lib-" + libName.
-  local localPath is path("1:/"):combine("libs", fullName).
 
-  if data:init fetchFile(
-    open(path("0:/"):combine("libs", fullName)),
-    localPath
-  ).
+  if scriptpath():volume = archive {
+    // We're running on the archive, just load the library.
+    local archivePath is path("0:/"):combine("libs", fullName).
+    runoncepath(archivePath:changeextension("ks")).
+  } else {
+    local localPath is path("1:/"):combine("libs", fullName).
 
-  runoncepath(localPath).
+    if data:init fetchFile(
+      open(path("0:/"):combine("libs", fullName)),
+      localPath
+    ).
+
+    runoncepath(localPath).
+  }.
 
   return data:libs[data:libNames:pop()].
 }.
