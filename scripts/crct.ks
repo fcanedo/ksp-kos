@@ -21,11 +21,11 @@ local function addNode {
   local parameter apsisRadius.
   local parameter apsisTime.
 
-  local velocityAt is sqrt(
+  local vAt is sqrt(
     velocity:orbit:mag^2 - 2 * body:mu *
       (1 / (body:radius + altitude) - 1 / apsisRadius)
     ).
   local circularVelocity is sqrt(body:mu / apsisRadius).
 
-  add node(apsisTime, 0, 0, circularVelocity - velocityAt).
+  add node(apsisTime, 0, 0, circularVelocity - vAt).
 }.

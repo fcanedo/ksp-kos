@@ -74,7 +74,7 @@ local function fetchFile {
       compile remoteFile to localPath:changeextension("ksm").
       local localFile is open(localPath).
 
-      if remoteFile:size <=localFile:size {
+      if remoteFile:size <= localFile:size {
         deletepath(localFile).
         copyFile().
       }.

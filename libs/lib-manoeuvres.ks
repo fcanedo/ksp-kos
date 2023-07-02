@@ -51,7 +51,7 @@ local function execute {
 
   lock throttle to 0.
   set ship:control:pilotmainthrottle to 0.
-  set steering to ship:facing.
+  lock steering to ship:facing.
   unlock throttle.
   unlock steering.
   sas on.

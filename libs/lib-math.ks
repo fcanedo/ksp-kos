@@ -23,11 +23,11 @@ local function axisTorque {
 // Returns the torque along one of the major axis,
 // as specified.
 local function torqueOf {
-  local parameter steering. // "pitch", "yaw" or "roll"
+  local parameter strng. // "pitch", "yaw" or "roll"
 
-  if steering = "pitch" return axisTorque(ship:facing * v(1, 0, 0)).
-  if steering = "yaw" return axisTorque(ship:facing * v(0, 1, 0)).
-  if steering = "roll" return axisTorque(ship:facing * v(0, 0, 1)).
+  if strng = "pitch" return axisTorque(ship:facing * v(1, 0, 0)).
+  if strng = "yaw" return axisTorque(ship:facing * v(0, 1, 0)).
+  if strng = "roll" return axisTorque(ship:facing * v(0, 0, 1)).
 }.
 
 // Calculates the burn time of a manoeuvre and final mass of the vessel
