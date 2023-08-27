@@ -1,7 +1,8 @@
 @lazyglobal off.
 
 lib:export(lex(
-  "execute", execute@
+  "execute", execute@,
+  "circularizeAt", circularizeAt@
 )).
 
 local stts is lib:import("stats").
@@ -58,6 +59,29 @@ local function execute {
   printStats().
   unlock burnStart.
   print "Done!" at(0, 6).
+}.
+
+local function circularizeAt {
+  local parameter apsis is "".
+
+  if "apoapsis":startswith(apsis)
+    addNode(body:radius + orbit:apoapsis, time + eta:apoapsis).
+  else if "periapsis":startswith(apsis)
+    addNode(body:radius + orbit:periapsis, time + eta:periapsis).
+}.
+
+local function addNode {
+  local parameter apsisRadius.
+  local parameter apsisTime.
+
+  local vAt is sqrt(
+    velocity:orbit:mag^2 - 2 * body:mu *
+    (1 / (body:radius + altitude) - 1 / apsisRadius)
+  ).
+
+  local circularVelocity is sqrt(body:mu / apsisRadius).
+
+  add node(apsisTime, 0, 0, circularVelocity - vAt).
 }.
 
 local function printStats {

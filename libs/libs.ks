@@ -4,7 +4,8 @@ global lib is lexicon(
   "init", init@,
   "import", import@,
   "export", export@,
-  "execute", execute@
+  "execute", execute@,
+  "initScript", initOneScript@
 ).
 
 local data is lexicon(
@@ -33,6 +34,14 @@ local function init {
     }.
   }.
   
+  set data:init to false.
+}.
+
+local function initOneScript {
+  local parameter script.
+
+  set data:init to true.
+  initScript(script).
   set data:init to false.
 }.
 
