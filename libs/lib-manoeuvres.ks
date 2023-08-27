@@ -28,7 +28,7 @@ local function execute {
 
   lock steering to lookdirup(nextnode:deltav, ship:facing * v(0, 1, 0)).
 
-  lock burnStart to burnStartTime:seconds - time:seconds.
+  lock burnStart to max(burnStartTime:seconds - time:seconds, 0).
 
   clearscreen.
   tpt:pushCursorDown(8).

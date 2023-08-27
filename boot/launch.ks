@@ -14,13 +14,13 @@ if scriptpath() = bootFilePath and
 
   lib:init().
 
-  deletepath(bootFilePath).
-  set core:bootfilename to "".
-  deletepath(path("1:/"):combine("/boot")).
-
   lib:initScript(archive:files:launch:lex["launch.ks"]).
 
   run launch.
+
+  deletepath(bootFilePath).
+  set core:bootfilename to "".
+  deletepath(path("1:/"):combine("/boot")).
 } else {
   print "This is a boot script. Don't run manually.".
 }.

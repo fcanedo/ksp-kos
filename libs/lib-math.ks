@@ -46,6 +46,12 @@ local function calcBurnTime {
   local parameter startingMass is ship:mass.
   local parameter isp is stts:getIsp().
 
+  if ship:availablethrust <= 0 // we're staging, no thrust
+  return lex(
+    "burnTime", 0,
+    "endMass", 0
+  ).
+
   if (dV <= 0) return 0.
 
   local ve is isp * constant:g0. // The effective exhaust velocity.
