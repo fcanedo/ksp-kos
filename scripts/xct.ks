@@ -1,6 +1,6 @@
 @lazyglobal off.
 
-runoncepath("libs/libs").
+runoncepath("/libs/libs").
 
 local mnvrs is lib:import("manoeuvres").
 

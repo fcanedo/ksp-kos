@@ -16,19 +16,22 @@ local function execute {
     return.
   }.
 
-  local dV is nextnode:deltav:mag.
-  local halfDv is dV / 2.
-  local preBurn is math:calcBurnTime(halfDv).
+  lock dV to nextnode:deltav:mag.
+  lock halfDv to dV / 2.
+  lock preBurn to math:calcBurnTime(halfDv).
 
-  // nextnode:time doesn't work, using `time + nextnode:eta` instead.
-  //local burnStartTime is nextnode:time - preBurn:burnTime.
-  local burnStartTime is time + nextnode:eta - preBurn:burnTime.
+  if preBurn:burnTime < 0 or preBurn:burnTime = 0 {
+    print "Couldn't calculate burn time. Check thrust availability".
+    return.
+  }.
+
+  lock burnStartTime to time(nextnode:time) - preBurn:burnTime.
 
   sas off.
 
   lock steering to lookdirup(nextnode:deltav, ship:facing * v(0, 1, 0)).
 
-  lock burnStart to max(burnStartTime:seconds - time:seconds, 0).
+  lock burnStart to max((burnStartTime - time):seconds, 0).
 
   clearscreen.
   tpt:pushCursorDown(8).
@@ -40,9 +43,11 @@ local function execute {
 
   lock remainingBurnTime to math:calcBurnTime():burnTime.
 
-  lock throttle to max(min(remainingBurnTime, 1), 0.01).
+  lock throttle to max(min(remainingBurnTime:seconds, 1), 0.01).
 
-  until remainingBurnTime < 0.001 or
+  // calcBurnTime returns -1 when it can't compute the burnTime
+  // due to no thrust being available during staging, for example
+  until (remainingBurnTime < 0.001 and remainingBurnTime > -1) or
     vang(ship:facing:vector, nextnode:deltav) > 90 {
 
     printStats().
@@ -85,6 +90,13 @@ local function addNode {
 }.
 
 local function printStats {
+  local _time1 is time + nextnode:eta.
+  local _time2 is nextnode:time.
+
+    print tpt:fulll(tpt:format("_time1:", 14) +
+      tpt:format(_time1, 3)) at(0, 0).
+    print tpt:fulll(tpt:format("_time2", 14) +
+      tpt:format(_time1, 10, 3)) at(0, 1).
     print tpt:fulll(tpt:format("Time to burn:", 14) +
       tpt:format(burnStart, 10, 3)) at(0, 2).
     print tpt:fulll(tpt:format("delta-V:", 14) +

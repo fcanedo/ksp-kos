@@ -2,6 +2,8 @@
 
 global lib is lexicon(
   "init", init@,
+  "initLib", initLib@,
+  "deleteLib", deleteLib@,
   "import", import@,
   "export", export@,
   "execute", execute@,
@@ -14,6 +16,9 @@ local data is lexicon(
  "init", false,
  "debug", false
 ).
+
+local archiveLibDir is path("0:/"):combine("libs").
+local localLibDir is path("1:/"):combine("/libs").
 
 local function execute {
   local parameter main.
@@ -37,6 +42,16 @@ local function init {
   set data:init to false.
 }.
 
+local function initLib {
+  local parameter libName.
+
+  set data:init to true.
+  local lib is import(libName).
+  set data:init to false.
+
+  return lib.
+}.
+
 local function initOneScript {
   local parameter script.
 
@@ -55,6 +70,12 @@ local function initScript {
   runoncepath(localPath).
 }.
 
+local function getFullName {
+  local parameter libName.
+
+  return "lib-" + libName.
+}.
+
 local function import {
   local parameter libName.
 
@@ -63,24 +84,32 @@ local function import {
 
   data:libNames:push(libName).
 
-  local fullName is "lib-" + libName.
+  local fullName is getFullName(libName).
+  local archivePath is archiveLibDir:combine(fullName).
 
   if scriptpath():volume = archive {
     // We're running on the archive, just load the library.
-    local archivePath is path("0:/"):combine("libs", fullName).
     runoncepath(archivePath:changeextension("ks")).
   } else {
-    local localPath is path("1:/"):combine("libs", fullName).
+    local localPath is localLibDir:combine(fullName).
 
-    if data:init fetchFile(
-      open(path("0:/"):combine("libs", fullName)),
-      localPath
-    ).
+    if data:init fetchFile(open(archivePath), localPath).
 
     runoncepath(localPath).
   }.
 
   return data:libs[data:libNames:pop()].
+}.
+
+local function deleteLib {
+  local parameter libName.
+
+  // We're running on the archive, do nothing
+  if scriptpath():volume = archive return.
+
+  local libFile is localLibDir:combine(getFullName(libName)).
+  // delete needs a non-relative path witouth the volume as a string
+  core:volume:delete("/" + libFile:segments:join("/")).
 }.
 
 local function fetchFile {
