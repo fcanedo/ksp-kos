@@ -13,27 +13,13 @@ if scriptpath() = bootFilePath and
   runoncepath("1:/libs/libs.ksm").
 
   lib:init().
+  lib:init(archive:files:launch).
 
-  local lnch is lib:import("launch").
-
-  lnch:launch(0, list(
-      lex(
-        "twr", 1.8,
-        "from", 0 * 1000),
-      lex(
-        "twr", 1.3,
-        "from", 20 * 1000),
-      lex(
-        "twr", 0.9,
-        "from", 50 * 1000)
-    )
-  ).
-
-  // We're not going to launch again.
-  lib:deleteLib("launch").
-
+  deletepath(bootFilePath).
   set core:bootfilename to "".
-  core:volume:delete("/boot").
+  deletepath(path("1:/"):combine("/boot")).
+
+  print "System initialized.".
 } else {
   print "This is a boot script. Don't run manually.".
 }.

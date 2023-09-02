@@ -2,12 +2,11 @@
 
 global lib is lexicon(
   "init", init@,
-  "initLib", initLib@,
+  "initDebug", initDebug@,
   "deleteLib", deleteLib@,
   "import", import@,
   "export", export@,
-  "execute", execute@,
-  "initScript", initOneScript@
+  "execute", execute@
 ).
 
 local data is lexicon(
@@ -27,36 +26,35 @@ local function execute {
     main().
 }.
 
+local function initDebug {
+  local parameter start is archive:files:scripts.
+
+  init(start, true).
+}.
+
 local function init {
+  local parameter start is archive:files:scripts.
   local parameter debug is false.
+
+  local target is open(start).
+
+  if path(target):volume <> archive {
+    print "Can only initialize scripts from the archive.".
+    return.
+  }.
 
   set data:debug to debug.
   set data:init to true.
 
-  for script in archive:files:scripts:list:values {
-    if script:isfile {
-      initScript(script).
+  if target:isfile
+    initScript(target).
+  else
+    for script in target:list:values {
+      if script:isfile {
+        initScript(script).
+      }.
     }.
-  }.
-  
-  set data:init to false.
-}.
 
-local function initLib {
-  local parameter libName.
-
-  set data:init to true.
-  local lib is import(libName).
-  set data:init to false.
-
-  return lib.
-}.
-
-local function initOneScript {
-  local parameter script.
-
-  set data:init to true.
-  initScript(script).
   set data:init to false.
 }.
 
