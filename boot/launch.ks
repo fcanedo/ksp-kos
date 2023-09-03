@@ -14,7 +14,7 @@ if scriptpath() = bootFilePath and
 
   lib:init().
 
-  local lnch is lib:import("launch").
+  local lnch is lib:import("launch", true).
 
   lnch:launch(0, list(
       lex(

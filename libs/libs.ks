@@ -76,6 +76,7 @@ local function getFullName {
 
 local function import {
   local parameter libName.
+  local parameter libInit is false.
 
   if data:libs:haskey(libName)
     return data:libs[libName].
@@ -91,7 +92,7 @@ local function import {
   } else {
     local localPath is localLibDir:combine(fullName).
 
-    if data:init fetchFile(open(archivePath), localPath).
+    if data:init or libInit fetchFile(open(archivePath), localPath).
 
     runoncepath(localPath).
   }.
