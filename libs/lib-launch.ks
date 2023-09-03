@@ -29,9 +29,13 @@ local function launch {
     for leg in legs {
       local from is leg:from.
       local twr is leg:twr.
-      on (ship:altitude > from) {
+
+      if ship:altitude < from
+        on (ship:altitude > from) {
+          lock throttle to calcThrottle(twr).
+        }.
+      else
         lock throttle to calcThrottle(twr).
-      }.
     }.
 
     print "Ready to launch. Press a key in the terminal or stage.".
