@@ -1,6 +1,7 @@
 @lazyglobal off.
 
 local parameter confirm is false.
+local parameter debug is false.
 
 // Can't define functions here, it breaks compilation
 // Possibly due to https://github.com/KSP-KOS/KOS/issues/691
@@ -24,7 +25,11 @@ if confirm and scriptpath():volume = core:volume {
     // re-init
     compile "0:/libs/libs.ks" to "1:/libs/libs.ksm".
     runoncepath("libs/libs").
-    lib:init().
+
+    if debug
+      lib:initDebug().
+    else
+      lib:init().
 
     print "Re-initialized scripts and libraries.".
   } else {

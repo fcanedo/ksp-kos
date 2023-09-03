@@ -6,6 +6,23 @@ lib:export(lex(
   "pushCursorDown", pushCursorDown@
 )).
 
+// there is no way to create a string with a character repeated x times
+// this allows us to take a substring of x zeros,
+// which prevents us from looping in time-sensitive code
+local initZeros is {
+  local i is 0.
+  local s is "".
+
+  until i >= terminal:width * 10 {
+    set s to s + "00000".
+    set i to i + 5.
+  }.
+
+  return s.
+}.
+
+local bagOfZeros is initZeros().
+
 local function format {
   local parameter data.
   local parameter width is 0.
@@ -32,19 +49,12 @@ local function addTrailingZeros {
   local parameter data.
   local parameter precision.
 
-  local result is data.
   local pointLoc is data:findlast(".").
-  local zeros is choose data:length - pointLoc if pointLoc > -1 else 0.
+  local missingZeros is precision - (choose data:length - pointLoc - 1
+    if pointLoc > -1 else 0).
+  local decimalPoint is choose "" if pointLoc > 0 else ".".
 
-  from {
-    local i is zeros.
-  } until i >= 4 step {
-    set i to i + 1.
-  } do {
-    set result to result + (choose "." if i = 0 else "0").
-  }.
-
-  return result.
+  return data + decimalPoint + bagOfZeros:substring(1, missingZeros).
 }.
 
 local function pushCursorDown {

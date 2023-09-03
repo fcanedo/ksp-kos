@@ -30,6 +30,11 @@ local function torqueOf {
   if strng = "roll" return axisTorque(ship:facing * v(0, 0, 1)).
 }.
 
+local emptyBurnTime is lex(
+  "burnTime", timespan(-1),
+  "endMass", -1
+).
+
 // Calculates the burn time of a manoeuvre and final mass of the vessel
 //  after performing the manoeuvre.
 // Parameters:
@@ -46,14 +51,11 @@ local function calcBurnTime {
   local parameter startingMass is ship:mass.
   local parameter isp is stts:getIsp().
 
+  if (dV <= 0) return emptyBurnTime.
+
   local avThrust is ship:availablethrust.
   if avThrust <= 0 or isp <= 0 // we're staging, no thrust
-  return lex(
-    "burnTime", timespan(-1),
-    "endMass", -1
-  ).
-
-  if (dV <= 0) return 0.
+    return emptyBurnTime.
 
   local ve is isp * constant:g0. // The effective exhaust velocity.
   local propFrac is constant:e^(-dV / ve). // The propellant mass fraction.

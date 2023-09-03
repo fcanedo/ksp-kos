@@ -37,23 +37,25 @@ local function execute {
   tpt:pushCursorDown(8).
 
   until burnStart <= 0 {
-    printStats().
+    printPreBurnStats().
     wait 0.0001.
   }.
 
-  lock remainingBurnTime to math:calcBurnTime():burnTime.
+  unlock burnStart.
+  local remainingBurnTime is math:calcBurnTime():burnTime.
 
   lock throttle to max(min(remainingBurnTime:seconds, 1), 0.01).
+
+  local origDeltav is nextnode:deltav.
 
   // calcBurnTime returns -1 when it can't compute the burnTime
   // due to no thrust being available during staging, for example
   until (remainingBurnTime < 0.001 and remainingBurnTime > -1) or
-    vang(ship:facing:vector, nextnode:deltav) > 90 {
+    vang(origDeltav, origDeltav) > 5 {
 
     printStats().
-    wait 0.0001.
+    set remainingBurnTime to math:calcBurnTime():burnTime.
   }.
-
 
   lock throttle to 0.
   set ship:control:pilotmainthrottle to 0.
@@ -62,7 +64,6 @@ local function execute {
   unlock steering.
   sas on.
   printStats().
-  unlock burnStart.
   print "Done!" at(0, 6).
 }.
 
@@ -89,18 +90,15 @@ local function addNode {
   add node(apsisTime, 0, 0, circularVelocity - vAt).
 }.
 
-local function printStats {
-  local _time1 is time + nextnode:eta.
-  local _time2 is nextnode:time.
+local function printPreBurnStats {
+  print tpt:fulll(tpt:format("Time to burn:", 14) +
+    tpt:format(burnStart, 10, 3)) at(0, 0).
+  printStats().
+}.
 
-    print tpt:fulll(tpt:format("_time1:", 14) +
-      tpt:format(_time1, 3)) at(0, 0).
-    print tpt:fulll(tpt:format("_time2", 14) +
-      tpt:format(_time1, 10, 3)) at(0, 1).
-    print tpt:fulll(tpt:format("Time to burn:", 14) +
-      tpt:format(burnStart, 10, 3)) at(0, 2).
-    print tpt:fulll(tpt:format("delta-V:", 14) +
-      tpt:format(nextnode:deltav:mag, 10, 3)) at(0, 3).
-    print tpt:fulll(tpt:format("Throttle:", 14) +
-      tpt:format(throttle, 10, 3)) at(0, 4).
+local function printStats {
+  print tpt:fulll(tpt:format("delta-V:", 14) +
+    tpt:format(nextnode:deltav:mag, 10, 3)) at(0, 1).
+  print tpt:fulll(tpt:format("Throttle:", 14) +
+    tpt:format(throttle, 10, 3)) at(0, 2).
 }.
