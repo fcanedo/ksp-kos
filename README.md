@@ -1,7 +1,9 @@
 Scripts for kOS
 ===============
 
-Bunch of scripts [Kerbal Space Program (1)](https://www.kerbalspaceprogram.com/) to reduce chore-like aspects of the game.
+Bunch of scripts for [Kerbal Space Program
+(1)](https://www.kerbalspaceprogram.com/) to reduce chore-like aspects of the
+game.
 
 Heavily inspired by:
 
