@@ -38,6 +38,9 @@ local function launch {
         lock throttle to calcThrottle(twr).
     }.
 
+    local weight is ship:body:mu * ship:mass /
+      (ship:body:radius)^2.
+
     print "Ready to launch. Press a key in the terminal or stage.".
 
     on terminal:input:haschar {
@@ -99,16 +102,30 @@ local function calcHeading {
 
 local function calcThrottle {
   local parameter wantedTwr.
+  local parameter engines is ship:engines.
 
-  if wantedTWR <= 0 or
-    ship:availablethrust <= 0 // we're about to stage or we're on the pad
-    return 1.
-  else {
-    local weight is ship:body:mu / ship:body:radius^2 * ship:mass.
-    local availableTWR is ship:availablethrust / weight.
+  local lockedThrust is 0.
+  local throttlableThrust is 0.
 
-    return wantedTWR / availableTWR.
+  for engine in engines {
+    if engine:ignition {
+      if engine:throttlelock
+        set lockedThrust to lockedThrust + engine:availablethrust.
+      else
+        set throttlableThrust to throttlableThrust + engine:availablethrust.
+    }
   }.
+
+  local weight is ship:body:mu * ship:mass / ship:body:radius^2.
+
+  local wantedThrust is wantedTwr * weight.
+
+  if wantedThrust <= lockedThrust
+    return 0.
+  else if wantedThrust > lockedThrust + throttlableThrust
+    return 1.
+  else
+    return (wantedThrust - lockedThrust) / throttlableThrust.
 }.
 
 local function mustStage {
