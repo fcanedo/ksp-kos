@@ -22,10 +22,10 @@ if scriptpath() = bootFilePath and
         "from", 0 * 1000),
       lex(
         "twr", 1.3,
-        "from", 20 * 1000),
+        "from", 50 * 1000),
       lex(
         "twr", 0.9,
-        "from", 50 * 1000)
+        "from", 70 * 1000)
     )
   ).
 

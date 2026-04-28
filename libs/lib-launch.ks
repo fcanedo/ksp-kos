@@ -10,8 +10,7 @@ local function launch {
   local parameter inclination is 0.
   local parameter legs is list().
 
-  local altitudeHorizontal is 70 * 1000. // meter.
-  local altitudePrograde is 35 * 1000. // meter.
+  local altitudeHorizontal is 60 * 1000. // meter.
   local targetApoapsis is 100 * 1000. // meter.
   local direction is mod(inclination + 90, 180).
 
@@ -56,11 +55,6 @@ local function launch {
     }.
 
     lock steering to calcHeading(direction, altitudeHorizontal).
-
-    wait until ship:altitude >= altitudePrograde or
-      ship:orbit:apoapsis >= targetApoapsis.
-
-    lock steering to progradeDirection.
 
     wait until ship:orbit:apoapsis >= targetApoapsis.
 
